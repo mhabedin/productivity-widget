@@ -60,20 +60,6 @@ window.AppState = {
   sessionCount: 0,
 };
 
-/* ── click-through: pass mouse through transparent areas ───── */
-document.addEventListener('mousemove', (e) => {
-  const el = document.elementFromPoint(e.clientX, e.clientY);
-  if (el && el !== document.documentElement && el !== document.body) {
-    window.electronAPI.setIgnoreMouseEvents(false);
-  } else {
-    window.electronAPI.setIgnoreMouseEvents(true, { forward: true });
-  }
-});
-
-document.addEventListener('mouseleave', () => {
-  window.electronAPI.setIgnoreMouseEvents(true, { forward: true });
-});
-
 /* ── compact toggle ─────────────────────────────────────────── */
 document.getElementById('btn-compact').addEventListener('click', () => {
   AppState.isCompact = !AppState.isCompact;
