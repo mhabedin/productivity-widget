@@ -109,13 +109,15 @@ ipcMain.handle('gcal:authenticate', async () => {
 ipcMain.handle('gcal:revoke', () => { gcalAuth.revoke(); return true; });
 
 ipcMain.handle('gcal:get-events', async () => {
-  if (!gcalAuth.isAuthenticated()) return { events: [], error: 'Not authenticated — click 🔗 to connect Google Calendar' };
+  const authed = gcalAuth.isAuthenticated();
+  console.log(`gcal:get-events — isAuthenticated=${authed}`);
+  if (!authed) return { events: [], error: 'Not authenticated — click 🔗 to connect Google Calendar' };
   try {
     const events = await gcalAPI.getTodayEvents();
-    console.log(`gcal:get-events — returned ${events.length} event(s)`);
+    console.log(`gcal:get-events — OK, ${events.length} event(s)`);
     return { events };
   } catch (err) {
-    console.error('gcal:get-events error:', err.message);
+    console.error('gcal:get-events ERROR:', err.message);
     return { events: [], error: err.message };
   }
 });

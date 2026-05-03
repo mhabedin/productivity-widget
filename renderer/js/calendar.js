@@ -196,7 +196,9 @@ window.fetchAndRenderCalendar = async function () {
   document.getElementById('sync-spinner')?.classList.add('hidden');
 
   if (result.error) {
-    setCalStatus(`Could not load events:\n${result.error}`, true);
+    renderCalendar([]);
+    setCalStatus(`⚠ ${result.error}`, true);
+    alert(`Google Calendar error:\n\n${result.error}\n\nCheck the calendar panel for details.`);
     return;
   }
 
