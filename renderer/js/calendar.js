@@ -125,26 +125,55 @@ window.refreshEventTaskList = function (eventId) {
   container.innerHTML = '';
 
   const linked = AppState.tasks.filter((t) => t.linkedBlocks?.includes(eventId));
+  if (linked.length === 0) return;
+
   linked.forEach((task) => {
     const el = document.createElement('div');
     el.className = `cal-linked-task${task.completed ? ' done' : ''}`;
-    el.textContent = `${task.completed ? '✅' : '⬜'} ${task.text}`;
+
+    const icon = document.createElement('span');
+    icon.className = 'cal-task-icon';
+    icon.textContent = task.completed ? '✅' : '⬜';
+
+    const text = document.createElement('span');
+    text.className = 'cal-task-text';
+    text.textContent = task.text;
+
+    el.appendChild(icon);
+    el.appendChild(text);
     container.appendChild(el);
   });
 
-  // Progress
-  if (linked.length > 0) {
-    const block = document.querySelector(`.cal-event[data-event-id="${eventId}"]`);
-    const done  = linked.filter((t) => t.completed).length;
-    let prog = block?.querySelector('.cal-progress');
-    if (!prog) {
-      prog = document.createElement('div');
-      prog.className = 'cal-progress';
-      block?.appendChild(prog);
-    }
-    prog.textContent = `${done}/${linked.length} tasks`;
+  const block = document.querySelector(`.cal-event[data-event-id="${eventId}"]`);
+  const done = linked.filter((t) => t.completed).length;
+  const allDone = done === linked.length;
+
+  let prog = block?.querySelector('.cal-progress');
+  if (!prog) {
+    prog = document.createElement('div');
+    prog.className = 'cal-progress';
+    block?.appendChild(prog);
+  }
+  if (allDone) {
+    prog.textContent = '✅ All done!';
+    prog.classList.add('all-done');
+  } else {
+    prog.textContent = `${done}/${linked.length} done`;
+    prog.classList.remove('all-done');
   }
 };
+
+/* ── drop confirmation ✓ mark ─────────────────────────────────── */
+function showDropConfirmation(block) {
+  const rect = block.getBoundingClientRect();
+  const mark = document.createElement('div');
+  mark.className = 'drop-confirm-mark';
+  mark.textContent = '✓';
+  mark.style.left = `${rect.left + rect.width / 2}px`;
+  mark.style.top  = `${rect.top  + rect.height / 2}px`;
+  document.body.appendChild(mark);
+  mark.addEventListener('animationend', () => mark.remove(), { once: true });
+}
 
 /* ── link a task to a calendar event ─────────────────────────── */
 window.linkTaskToEvent = function (taskId, eventId) {
@@ -160,6 +189,9 @@ window.linkTaskToEvent = function (taskId, eventId) {
   renderTasks();
   refreshEventTaskList(eventId);
   window.queueWriteback?.(eventId);
+
+  const block = document.querySelector(`.cal-event[data-event-id="${eventId}"]`);
+  if (block) showDropConfirmation(block);
 };
 
 /* ── status message inside calendar panel ────────────────────── */
