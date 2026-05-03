@@ -73,20 +73,33 @@ Or double-click **"Productivity Widget"** on your Desktop.
 ## Google Calendar Setup (optional)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
-2. Create a project → **APIs & Services** → enable **Google Calendar API**
-3. Create **OAuth 2.0 Client ID** (Desktop app type)
-4. Download credentials and copy them to:
+2. Create a project → **APIs & Services** → **Library** → search **Google Calendar API** → click **Enable**
+3. Go to **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID** (Desktop app type)
+4. Download the credentials JSON and copy it to:
    ```
    config/credentials.json
    ```
    (use `config/credentials.example.json` as a template)
 5. Click the **🔗** button in the calendar panel header and sign in
+6. After sign-in the button turns ✅ and events load automatically
 
 Google Calendar is **free** for personal use. No credit card required.
 
 ### What syncs
 - Reads today's events with their colours
 - When tasks are linked to a block and checked off, their status is written back to the event's description in Google Calendar every 90 seconds
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| Demo blocks show instead of real events | Google Calendar API not enabled | In Cloud Console → APIs & Services → Library → enable **Google Calendar API** |
+| Alert: "API has not been used in project…" | Same as above | Enable the Calendar API for your project |
+| Alert: "Invalid grant" or "Token expired" | Auth token revoked or expired | Click ✅ → Disconnect, then reconnect with 🔗 |
+| Calendar panel blank after connecting | No timed events today (all-day or empty day) | Normal — all-day events are not shown on the time grid |
+| 🔗 button stays as ⏳ forever | OAuth callback server blocked | Check that nothing is blocking port 52741 |
+
+Press **F12** inside the widget to open DevTools and check the Console for detailed error messages.
 
 ---
 
