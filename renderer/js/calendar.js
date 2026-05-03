@@ -201,11 +201,17 @@ window.fetchAndRenderCalendar = async function () {
   }
 
   const events = result.events || [];
+  const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
+  const timedEvents = events.filter((ev) => !ev.allDay);
   if (events.length === 0) {
-    setCalStatus('No events found for today.');
+    setCalStatus(`No events found for ${dateLabel}.`);
     renderCalendar([]);
+  } else if (timedEvents.length === 0) {
+    setCalStatus(`Only all-day events on ${dateLabel}.`);
+    renderCalendar(events);
   } else {
+    setCalStatus(null);
     renderCalendar(events);
     scrollToCurrent();
   }

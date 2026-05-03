@@ -52,6 +52,12 @@ function createWindow() {
 
   mainWindow.setAlwaysOnTop(true, 'screen-saver');
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+
+  mainWindow.webContents.on('before-input-event', (_e, input) => {
+    if (input.key === 'F12' && input.type === 'keyDown') {
+      mainWindow.webContents.toggleDevTools();
+    }
+  });
 }
 
 // ─── IPC: Window ─────────────────────────────────────────────
@@ -103,9 +109,15 @@ ipcMain.handle('gcal:authenticate', async () => {
 ipcMain.handle('gcal:revoke', () => { gcalAuth.revoke(); return true; });
 
 ipcMain.handle('gcal:get-events', async () => {
-  if (!gcalAuth.isAuthenticated()) return { events: [] };
-  try   { return { events: await gcalAPI.getTodayEvents() }; }
-  catch (err) { return { events: [], error: err.message }; }
+  if (!gcalAuth.isAuthenticated()) return { events: [], error: 'Not authenticated — click 🔗 to connect Google Calendar' };
+  try {
+    const events = await gcalAPI.getTodayEvents();
+    console.log(`gcal:get-events — returned ${events.length} event(s)`);
+    return { events };
+  } catch (err) {
+    console.error('gcal:get-events error:', err.message);
+    return { events: [], error: err.message };
+  }
 });
 
 ipcMain.handle('gcal:writeback', async (_e, { eventId, tasks }) => {
