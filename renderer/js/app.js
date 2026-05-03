@@ -115,29 +115,46 @@ document.getElementById('btn-today-filter').addEventListener('click', () => {
 });
 
 /* ── Google Calendar connect button ─────────────────────────── */
+function setGcalConnected(connected) {
+  const connectBtn = document.getElementById('btn-gcal-connect');
+  const refreshBtn = document.getElementById('btn-gcal-refresh');
+  if (connected) {
+    connectBtn.textContent = '✅';
+    connectBtn.title = 'Google Calendar connected (click to disconnect)';
+    refreshBtn.classList.remove('hidden');
+  } else {
+    connectBtn.textContent = '🔗';
+    connectBtn.title = 'Connect Google Calendar';
+    refreshBtn.classList.add('hidden');
+  }
+}
+
+document.getElementById('btn-gcal-refresh').addEventListener('click', async () => {
+  if (typeof window.fetchAndRenderCalendar === 'function') {
+    await window.fetchAndRenderCalendar();
+  }
+});
+
 document.getElementById('btn-gcal-connect').addEventListener('click', async () => {
-  const btn = document.getElementById('btn-gcal-connect');
   const isAuth = await window.electronAPI.gcalIsAuthenticated();
   if (isAuth) {
     if (confirm('Disconnect Google Calendar?')) {
       await window.electronAPI.gcalRevoke();
-      btn.textContent = '🔗';
-      btn.title = 'Connect Google Calendar';
+      setGcalConnected(false);
       AppState.calendarEvents = [];
       if (typeof window.renderCalendar === 'function') window.renderCalendar([]);
     }
   } else {
-    btn.textContent = '⏳';
+    document.getElementById('btn-gcal-connect').textContent = '⏳';
     const result = await window.electronAPI.gcalAuthenticate();
     if (result.success) {
-      btn.textContent = '✅';
-      btn.title = 'Google Calendar connected';
+      setGcalConnected(true);
       if (typeof window.fetchAndRenderCalendar === 'function') {
         await window.fetchAndRenderCalendar();
       }
     } else {
-      btn.textContent = '🔗';
-      alert('Authentication failed: ' + (result.error || 'Unknown error'));
+      setGcalConnected(false);
+      alert('Authentication failed:\n' + (result.error || 'Unknown error'));
     }
   }
 });

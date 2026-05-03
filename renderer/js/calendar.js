@@ -162,11 +162,51 @@ window.linkTaskToEvent = function (taskId, eventId) {
   window.queueWriteback?.(eventId);
 };
 
+/* ── status message inside calendar panel ────────────────────── */
+function setCalStatus(msg, isError) {
+  let el = document.getElementById('cal-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'cal-status';
+    el.style.cssText = [
+      'padding:8px 10px',
+      'font-size:11px',
+      'text-align:center',
+      'white-space:pre-wrap',
+      'word-break:break-word',
+    ].join(';');
+    document.getElementById('calendar-scroll').prepend(el);
+  }
+  if (msg) {
+    el.textContent = msg;
+    el.style.color = isError ? 'var(--high)' : 'var(--text-dim)';
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 /* ── fetch events from Google Calendar ───────────────────────── */
 window.fetchAndRenderCalendar = async function () {
+  document.getElementById('sync-spinner')?.classList.remove('hidden');
+  setCalStatus(null);
+
   const result = await window.electronAPI.gcalGetEvents();
-  if (result.events) {
-    renderCalendar(result.events);
+
+  document.getElementById('sync-spinner')?.classList.add('hidden');
+
+  if (result.error) {
+    setCalStatus(`Could not load events:\n${result.error}`, true);
+    return;
+  }
+
+  const events = result.events || [];
+
+  if (events.length === 0) {
+    setCalStatus('No events found for today.');
+    renderCalendar([]);
+  } else {
+    renderCalendar(events);
     scrollToCurrent();
   }
 };
