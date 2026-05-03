@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Productivity Widget</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── Drag handle + window controls ── -->
+    <div id="drag-handle">
+      <div id="drag-grip">
+        <span class="grip-dot"></span><span class="grip-dot"></span><span class="grip-dot"></span>
+      </div>
+      <div id="window-controls">
+        <button id="btn-compact"   class="ctrl-btn" title="Toggle compact">⊟</button>
+        <button id="btn-pin"       class="ctrl-btn active" title="Always on top">📌</button>
+        <button id="btn-minimize"  class="ctrl-btn" title="Minimize">─</button>
+      </div>
+    </div>
+
+    <!-- ── Clock + Focus bar ── -->
+    <div id="top-bar">
+      <div id="clock-section">
+        <div id="time-display">00:00:00</div>
+        <div id="date-display">Loading…</div>
+      </div>
+      <div id="focus-section">
+        <div id="session-counter">0 sessions today</div>
+        <button id="btn-focus">▶ Focus</button>
+      </div>
+    </div>
+
+    <!-- ── Active focus session banner ── -->
+    <div id="focus-banner" class="hidden">
+      <div id="focus-banner-task"></div>
+      <div id="focus-banner-timer">25:00</div>
+      <div id="focus-banner-bar"><div id="focus-banner-fill"></div></div>
+      <button id="btn-stop-focus">■ Stop</button>
+    </div>
+
+    <!-- ── Two panels ── -->
+    <div id="main-content">
+
+      <!-- LEFT: Calendar -->
+      <div id="calendar-panel">
+        <div class="panel-header">
+          <span>📅 Today</span>
+          <div id="gcal-header-controls">
+            <div id="sync-spinner" class="hidden" title="Syncing…">
+              <div class="spin-ring"></div>
+            </div>
+            <button id="btn-gcal-connect" class="icon-btn" title="Connect Google Calendar">🔗</button>
+          </div>
+        </div>
+        <div id="calendar-scroll">
+          <div id="time-grid">
+            <!-- Hour labels + event blocks injected by JS -->
+            <div id="current-time-line"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Todo -->
+      <div id="todo-panel">
+        <div class="panel-header">
+          <span>Tasks</span>
+          <div id="todo-header-controls">
+            <span id="overdue-badge" class="hidden">0</span>
+            <button id="btn-today-filter" class="icon-btn" title="Today only">📅</button>
+            <button id="btn-add-task"     class="icon-btn" title="Add task (Ctrl+Shift+T)">＋</button>
+          </div>
+        </div>
+        <div id="todo-list">
+          <!-- Task items injected by JS -->
+        </div>
+      </div>
+
+    </div><!-- /#main-content -->
+
+    <!-- ── Quick-add bar ── -->
+    <div id="quick-add-bar" class="hidden">
+      <input id="quick-add-input" type="text" placeholder="New task… (Enter saves, Esc cancels)" autocomplete="off">
+      <div id="quick-add-priorities">
+        <button class="qp-btn" data-priority="high">●</button>
+        <button class="qp-btn active" data-priority="medium">●</button>
+        <button class="qp-btn" data-priority="low">●</button>
+      </div>
+    </div>
+
+    <!-- ── Focus session modal ── -->
+    <div id="focus-modal" class="hidden">
+      <div class="modal-card">
+        <h3>Start Focus Session</h3>
+        <input id="focus-task-input" type="text" placeholder="What are you working on?" autocomplete="off">
+        <div id="duration-options">
+          <button class="dur-btn active" data-duration="25">25 min</button>
+          <button class="dur-btn"        data-duration="45">45 min</button>
+          <button class="dur-btn"        data-duration="60">60 min</button>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-start-focus">▶ Start</button>
+          <button id="btn-cancel-focus" class="secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Break nudge modal ── -->
+    <div id="break-modal" class="hidden">
+      <div class="modal-card">
+        <div class="break-icon">☕</div>
+        <h3>Session complete!</h3>
+        <p>Take a 5-min break — stand up, breathe, drink water.</p>
+        <button id="btn-dismiss-break">Got it</button>
+      </div>
+    </div>
+
+    <!-- ── Compact overlay (shown when compact) ── -->
+    <div id="compact-view" class="hidden">
+      <div id="compact-time">00:00</div>
+      <div id="compact-tasks">0 tasks</div>
+    </div>
+
+    <!-- ── Drop-onto-empty-space dialog ── -->
+    <div id="new-event-modal" class="hidden">
+      <div class="modal-card">
+        <h3>Create calendar block?</h3>
+        <p id="new-event-desc"></p>
+        <input id="new-event-title" type="text" placeholder="Block title" autocomplete="off">
+        <div class="modal-actions">
+          <button id="btn-create-event">Create</button>
+          <button id="btn-cancel-event" class="secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#app -->
+
+  <!-- Resize handles — outside #app so overflow:hidden doesn't block them -->
+  <div id="resize-e"  class="rh" title="Drag to resize width"></div>
+  <div id="resize-s"  class="rh" title="Drag to resize height"></div>
+  <div id="resize-se" class="rh" title="Drag to resize">⌟</div>
+
+  <script src="js/app.js"></script>
+  <script src="js/clock.js"></script>
+  <script src="js/todo.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/focus-timer.js"></script>
+  <script src="js/drag-drop.js"></script>
+</body>
+</html>
