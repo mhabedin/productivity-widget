@@ -87,10 +87,16 @@ document.getElementById('btn-compact').addEventListener('click', () => {
 });
 
 /* ── always-on-top pin ──────────────────────────────────────── */
+function updatePinButton() {
+  const btn = document.getElementById('btn-pin');
+  btn.classList.toggle('active', AppState.isPinned);
+  btn.title = AppState.isPinned ? 'Always on top — click to unpin' : 'Pinned off — click to pin';
+}
+
 document.getElementById('btn-pin').addEventListener('click', () => {
   AppState.isPinned = !AppState.isPinned;
   window.electronAPI.toggleAlwaysOnTop(AppState.isPinned);
-  document.getElementById('btn-pin').classList.toggle('active', AppState.isPinned);
+  updatePinButton();
 });
 
 /* ── minimize ───────────────────────────────────────────────── */

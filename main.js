@@ -50,7 +50,7 @@ function createWindow() {
     },
   });
 
-  mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  mainWindow.setAlwaysOnTop(true, 'floating');
   mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 
   mainWindow.webContents.on('before-input-event', (_e, input) => {
@@ -81,8 +81,7 @@ ipcMain.on('resize-window', (_e, w, h) => {
 });
 
 ipcMain.on('toggle-always-on-top', (_e, enabled) => {
-  if (enabled) mainWindow?.setAlwaysOnTop(true, 'screen-saver');
-  else         mainWindow?.setAlwaysOnTop(false);
+  mainWindow?.setAlwaysOnTop(!!enabled, 'floating');
 });
 
 ipcMain.on('minimize-window', () => mainWindow?.minimize());
