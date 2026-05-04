@@ -880,22 +880,18 @@ html, body {
    Event detail overlay
    ════════════════════════════════════════════════════ */
 #event-detail-panel {
-  position: absolute;
-  inset: 0;
-  background: var(--surface);
-  z-index: 60;
+  width: var(--cal-w);
+  min-width: 80px;
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   overflow: hidden;
-  animation: detail-slide-in 0.16s ease;
-}
-
-@keyframes detail-slide-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  background: var(--surface);
 }
 
 #event-detail-panel.drag-over {
+  background: rgba(92, 124, 250, 0.07);
   outline: 2px dashed var(--accent);
   outline-offset: -3px;
 }

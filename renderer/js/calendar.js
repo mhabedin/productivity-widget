@@ -280,13 +280,14 @@ let _detailEventId = null;
 
 function openEventDetail(eventId) {
   _detailEventId = eventId;
-  const panel = document.getElementById('event-detail-panel');
   renderEventDetail(eventId);
-  panel.classList.remove('hidden');
+  document.getElementById('calendar-panel').classList.add('hidden');
+  document.getElementById('event-detail-panel').classList.remove('hidden');
 }
 
 function closeEventDetail() {
   document.getElementById('event-detail-panel').classList.add('hidden');
+  document.getElementById('calendar-panel').classList.remove('hidden');
   _detailEventId = null;
 }
 
@@ -337,6 +338,7 @@ function renderDetailTaskList(eventId) {
       check.classList.add('pop');
       check.addEventListener('animationend', () => check.classList.remove('pop'), { once: true });
       textEl.classList.toggle('done', task.completed);
+      textEl.textContent = task.completed ? `${task.text} — Task done` : task.text;
       window.electronAPI.saveTasks(AppState.tasks);
       if (typeof window.renderTasks === 'function') window.renderTasks();
       window.refreshEventTaskList?.(eventId);
@@ -346,7 +348,7 @@ function renderDetailTaskList(eventId) {
 
     const textEl = document.createElement('div');
     textEl.className = `detail-task-text${task.completed ? ' done' : ''}`;
-    textEl.textContent = task.text;
+    textEl.textContent = task.completed ? `${task.text} — Task done` : task.text;
 
     const unlink = document.createElement('button');
     unlink.className = 'detail-task-unlink';

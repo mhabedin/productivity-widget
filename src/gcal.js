@@ -48,9 +48,10 @@ class GCalAPI {
     const evRes = await this.cal.events.get({ calendarId: 'primary', eventId });
     const existing = evRes.data.description || '';
 
-    const taskLines = tasks.map((t) => `${t.completed ? '✅' : '⬜'} ${t.text}`).join('\n');
-    const ts = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const block = `${taskLines}\nLast synced: ${ts}`;
+    const taskLines = tasks
+      .map((t) => t.completed ? `${t.text} — Task done` : t.text)
+      .join('\n');
+    const block = taskLines;
 
     let newDesc;
     if (existing.includes('\n---\n')) {

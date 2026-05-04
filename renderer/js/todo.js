@@ -278,7 +278,7 @@ function attachTaskDragHandlers(item, task) {
     dragSrcId = task.id;
     item.classList.add('dragging');
     e.dataTransfer.setData('text/task-id', task.id);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = 'all';
   });
 
   item.addEventListener('dragend', () => {
