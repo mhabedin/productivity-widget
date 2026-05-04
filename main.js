@@ -81,7 +81,12 @@ ipcMain.on('resize-window', (_e, w, h) => {
 });
 
 ipcMain.on('toggle-always-on-top', (_e, enabled) => {
-  mainWindow?.setAlwaysOnTop(!!enabled, 'floating');
+  if (enabled) {
+    mainWindow?.setAlwaysOnTop(true, 'floating');
+  } else {
+    mainWindow?.setAlwaysOnTop(false);
+  }
+  console.log(`always-on-top toggled → now ${mainWindow?.isAlwaysOnTop()}`);
 });
 
 ipcMain.on('minimize-window', () => mainWindow?.minimize());

@@ -86,17 +86,36 @@ document.getElementById('btn-compact').addEventListener('click', () => {
   }
 });
 
+/* ── toast helper ───────────────────────────────────────────── */
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = [
+    'position:fixed', 'bottom:28px', 'left:50%',
+    'transform:translateX(-50%)',
+    'background:rgba(30,30,50,0.95)',
+    'color:#dde0f0', 'font-size:12px',
+    'padding:5px 14px', 'border-radius:20px',
+    'z-index:99999', 'pointer-events:none',
+    'border:1px solid rgba(255,255,255,0.1)',
+    'transition:opacity 0.35s',
+  ].join(';');
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 380); }, 1400);
+}
+
 /* ── always-on-top pin ──────────────────────────────────────── */
 function updatePinButton() {
   const btn = document.getElementById('btn-pin');
   btn.classList.toggle('active', AppState.isPinned);
-  btn.title = AppState.isPinned ? 'Always on top — click to unpin' : 'Pinned off — click to pin';
+  btn.title = AppState.isPinned ? 'Always on top (click to unpin)' : 'Not pinned (click to pin)';
 }
 
 document.getElementById('btn-pin').addEventListener('click', () => {
   AppState.isPinned = !AppState.isPinned;
   window.electronAPI.toggleAlwaysOnTop(AppState.isPinned);
   updatePinButton();
+  showToast(AppState.isPinned ? '📌 Pinned — always on top' : '📌 Unpinned — other windows can cover this');
 });
 
 /* ── minimize ───────────────────────────────────────────────── */
