@@ -78,6 +78,29 @@
         </div>
       </div>
 
+      <!-- ── Event detail overlay (shown when a calendar block is clicked) ── -->
+      <div id="event-detail-panel" class="hidden">
+        <div id="event-detail-header">
+          <button id="btn-close-detail" class="icon-btn" title="Back to calendar">←</button>
+          <div id="event-detail-color-dot"></div>
+          <div id="event-detail-info">
+            <div id="event-detail-title"></div>
+            <div id="event-detail-time"></div>
+          </div>
+        </div>
+        <div id="event-detail-body">
+          <div id="event-detail-desc-section" class="hidden">
+            <div class="detail-label">Notes</div>
+            <div id="event-detail-desc"></div>
+          </div>
+          <div>
+            <div class="detail-label">Linked Tasks</div>
+            <div id="event-detail-task-list"></div>
+            <div id="event-detail-empty-hint" class="detail-hint">Drop a task here to link it to this event</div>
+          </div>
+        </div>
+      </div>
+
     </div><!-- /#main-content -->
 
     <!-- ── Quick-add bar ── -->

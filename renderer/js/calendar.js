@@ -96,6 +96,9 @@ window.renderCalendar = function (events) {
     if (height > 30) block.appendChild(timeEl);
     if (height > 45) block.appendChild(taskListEl);
 
+    // Click to open event detail
+    block.addEventListener('click', () => openEventDetail(ev.id));
+
     // Drop target for tasks
     block.addEventListener('dragover', (e) => {
       if (!e.dataTransfer.types.includes('text/task-id')) return;
@@ -186,9 +189,11 @@ window.linkTaskToEvent = function (taskId, eventId) {
   }
 
   window.electronAPI.saveTasks(AppState.tasks);
-  renderTasks();
+  if (typeof window.renderTasks === 'function') window.renderTasks();
   refreshEventTaskList(eventId);
+  renderDetailTaskList(eventId);       // refresh detail panel if open
   window.queueWriteback?.(eventId);
+  setTimeout(() => window.flushWritebacks?.(), 400); // write to GCal immediately
 
   const block = document.querySelector(`.cal-event[data-event-id="${eventId}"]`);
   if (block) showDropConfirmation(block);
@@ -269,6 +274,122 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 /* ── auto-scroll drift every 5 minutes ──────────────────────── */
 setInterval(scrollToCurrent, 5 * 60_000);
+
+/* ── event detail panel ──────────────────────────────────────── */
+let _detailEventId = null;
+
+function openEventDetail(eventId) {
+  _detailEventId = eventId;
+  const panel = document.getElementById('event-detail-panel');
+  renderEventDetail(eventId);
+  panel.classList.remove('hidden');
+}
+
+function closeEventDetail() {
+  document.getElementById('event-detail-panel').classList.add('hidden');
+  _detailEventId = null;
+}
+
+function renderEventDetail(eventId) {
+  const ev = AppState.calendarEvents.find((e) => e.id === eventId);
+  if (!ev) return;
+
+  document.getElementById('event-detail-color-dot').style.background = ev.color;
+  document.getElementById('event-detail-title').textContent = ev.title;
+  document.getElementById('event-detail-time').textContent =
+    `${fmtTime(ev.start)} – ${fmtTime(ev.end)}`;
+
+  // Show original GCal notes (strip the task block we write after ---)
+  const raw = (ev.description || '').trim();
+  const notes = raw.includes('\n---\n') ? raw.slice(0, raw.indexOf('\n---\n')).trim() : raw;
+  const descSection = document.getElementById('event-detail-desc-section');
+  if (notes) {
+    document.getElementById('event-detail-desc').textContent = notes;
+    descSection.classList.remove('hidden');
+  } else {
+    descSection.classList.add('hidden');
+  }
+
+  renderDetailTaskList(eventId);
+}
+
+function renderDetailTaskList(eventId) {
+  if (_detailEventId !== eventId) return; // panel showing a different event
+  const list = document.getElementById('event-detail-task-list');
+  const hint = document.getElementById('event-detail-empty-hint');
+  if (!list) return;
+  list.innerHTML = '';
+
+  const linked = AppState.tasks.filter((t) => t.linkedBlocks?.includes(eventId));
+  hint.classList.toggle('hidden', linked.length > 0);
+
+  linked.forEach((task) => {
+    const row = document.createElement('div');
+    row.className = 'detail-task-row';
+
+    const check = document.createElement('div');
+    check.className = `detail-task-check${task.completed ? ' checked' : ''}`;
+    check.title = task.completed ? 'Mark incomplete' : 'Mark complete';
+    check.addEventListener('click', () => {
+      task.completed = !task.completed;
+      task.completedAt = task.completed ? new Date().toISOString() : null;
+      check.classList.toggle('checked', task.completed);
+      check.classList.add('pop');
+      check.addEventListener('animationend', () => check.classList.remove('pop'), { once: true });
+      textEl.classList.toggle('done', task.completed);
+      window.electronAPI.saveTasks(AppState.tasks);
+      if (typeof window.renderTasks === 'function') window.renderTasks();
+      window.refreshEventTaskList?.(eventId);
+      window.queueWriteback?.(eventId);
+      setTimeout(() => window.flushWritebacks?.(), 400);
+    });
+
+    const textEl = document.createElement('div');
+    textEl.className = `detail-task-text${task.completed ? ' done' : ''}`;
+    textEl.textContent = task.text;
+
+    const unlink = document.createElement('button');
+    unlink.className = 'detail-task-unlink';
+    unlink.textContent = '×';
+    unlink.title = 'Unlink from this event';
+    unlink.addEventListener('click', () => {
+      task.linkedBlocks = task.linkedBlocks.filter((id) => id !== eventId);
+      window.electronAPI.saveTasks(AppState.tasks);
+      if (typeof window.renderTasks === 'function') window.renderTasks();
+      window.refreshEventTaskList?.(eventId);
+      window.queueWriteback?.(eventId);
+      setTimeout(() => window.flushWritebacks?.(), 400);
+      renderDetailTaskList(eventId);
+    });
+
+    row.appendChild(check);
+    row.appendChild(textEl);
+    row.appendChild(unlink);
+    list.appendChild(row);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-close-detail').addEventListener('click', closeEventDetail);
+
+  // Drag tasks directly onto the detail panel to link them
+  const panel = document.getElementById('event-detail-panel');
+  panel.addEventListener('dragover', (e) => {
+    if (!e.dataTransfer.types.includes('text/task-id') || !_detailEventId) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'link';
+    panel.classList.add('drag-over');
+  });
+  panel.addEventListener('dragleave', (e) => {
+    if (!panel.contains(e.relatedTarget)) panel.classList.remove('drag-over');
+  });
+  panel.addEventListener('drop', (e) => {
+    panel.classList.remove('drag-over');
+    if (!_detailEventId) return;
+    const taskId = e.dataTransfer.getData('text/task-id');
+    if (taskId) window.linkTaskToEvent(taskId, _detailEventId);
+  });
+});
 
 /* ── demo events (shown when not connected) ──────────────────── */
 function getDemoEvents() {

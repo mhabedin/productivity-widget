@@ -208,7 +208,7 @@ window.queueWriteback = function (eventId) {
   AppState.pendingWritebacks[eventId] = { tasks: linked, dirty: true };
 };
 
-async function flushWritebacks() {
+window.flushWritebacks = async function flushWritebacks() {
   const ids = Object.keys(AppState.pendingWritebacks);
   if (!ids.length) return;
 
@@ -227,7 +227,7 @@ async function flushWritebacks() {
   document.getElementById('sync-spinner').classList.add('hidden');
 }
 
-AppState.writebackTimer = setInterval(flushWritebacks, 90_000);
+AppState.writebackTimer = setInterval(window.flushWritebacks, 90_000);
 
 /* ── deadline amber warnings ──────────────────────────────────── */
 function checkDeadlines() {
